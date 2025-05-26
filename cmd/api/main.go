@@ -23,21 +23,23 @@ func init() {
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
-	router := routes(logger)
+	app := &application{
+		Logger: logger,
+	}
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", env.GetInt("SERVER_PORT", 8000)),
-		Handler:      router,
+		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  5 * time.Second,
 		WriteTimeout: 10 * time.Second,
-		ErrorLog:     slog.NewLogLogger(logger.Handler(), slog.LevelError),
+		ErrorLog:     slog.NewLogLogger(app.Logger.Handler(), slog.LevelError),
 	}
 
-	logger.Info("server started and running on", "addr", srv.Addr)
+	app.Logger.Info("server started and running on", "addr", srv.Addr)
 
 	if err := srv.ListenAndServe(); err != nil {
-		logger.Error(err.Error())
+		app.Logger.Error(err.Error())
 		os.Exit(1)
 	}
 }

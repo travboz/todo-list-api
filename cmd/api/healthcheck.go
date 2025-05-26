@@ -1,11 +1,10 @@
 package main
 
 import (
-	"log/slog"
 	"net/http"
 )
 
-func healthcheckHandler(logger *slog.Logger) http.Handler {
+func (app *application) healthcheckHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		data := envelope{
@@ -17,7 +16,7 @@ func healthcheckHandler(logger *slog.Logger) http.Handler {
 		// a generic error message.
 		err := writeJSON(w, http.StatusOK, data, nil)
 		if err != nil {
-			serverErrorResponse(logger, w, r, err)
+			serverErrorResponse(app.Logger, w, r, err)
 		}
 	})
 }
