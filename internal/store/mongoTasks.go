@@ -7,28 +7,28 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MongoStoreTasks struct {
+type MongoDBStoreTasks struct {
 	tasks *mongo.Collection
 }
 
-func (t MongoStoreTasks) Insert(context.Context, *data.Task) error {
+func (t MongoDBStoreTasks) Insert(context.Context, *data.Task) error {
 	return nil
 }
-func (t MongoStoreTasks) GetTaskById(context.Context, string) (*data.Task, error) {
+func (t MongoDBStoreTasks) GetTaskById(context.Context, string) (*data.Task, error) {
 	return nil, nil
 }
-func (t MongoStoreTasks) GetOwnerOfTask(context.Context, string) (string, error) {
+func (t MongoDBStoreTasks) GetOwnerOfTask(context.Context, string) (string, error) {
 	return "", nil
 }
-func (t MongoStoreTasks) FetchAllTasks(context.Context, string, []string) ([]*data.Task, error) {
+func (t MongoDBStoreTasks) FetchAllTasks(context.Context, string, []string) ([]*data.Task, error) {
 	return nil, nil
 }
-func (t MongoStoreTasks) UpdateTask(context.Context, string, *data.Task) (*data.Task, error) {
+func (t MongoDBStoreTasks) UpdateTask(context.Context, string, *data.Task) (*data.Task, error) {
 	return nil, nil
 }
-func (t MongoStoreTasks) DeleteTask(context.Context, string) error {
+func (t MongoDBStoreTasks) DeleteTask(context.Context, string) error {
 	return nil
 }
-func (t MongoStoreTasks) CompleteTask(context.Context, string) error {
+func (t MongoDBStoreTasks) CompleteTask(context.Context, string) error {
 	return nil
 }

@@ -5,18 +5,18 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type MongoStoreUsers struct {
+type MongoDBStoreUsers struct {
 	users *mongo.Collection
 }
 
-func (u MongoStoreUsers) Insert(name, email, password string) error {
+func (u MongoDBStoreUsers) Insert(name, email, password string) error {
 	return nil
 }
 
-func (u MongoStoreUsers) Exists(id string) (bool, error) {
+func (u MongoDBStoreUsers) Exists(id string) (bool, error) {
 	return false, nil
 }
 
-func (u MongoStoreUsers) Get(id string) (*data.User, error) {
+func (u MongoDBStoreUsers) Get(id string) (*data.User, error) {
 	return nil, nil
 }

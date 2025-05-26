@@ -9,7 +9,9 @@ import (
 	"time"
 
 	"github.com/joho/godotenv"
+	"github.com/travboz/backend-projects/todo-list-api/internal/db"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 )
 
 func init() {
@@ -23,8 +25,24 @@ func init() {
 func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
+	mongo_uri := env.GetString(
+		"MONGODB_URI",
+		"mongodb://travis:secret@localhost:27000/todo-list-api?authSource=admin&readPreference=primary&appname=MongDB%20Compass&directConnection=true&ssl=false",
+	)
+
+	mongoClient, err := db.NewMongoDBClient(mongo_uri)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	logger.Info("mongodb successfully connected")
+
+	store := store.NewMongoDBStorage(mongoClient)
+
 	app := &application{
-		Logger: logger,
+		Logger:  logger,
+		Storage: store,
 	}
 
 	srv := &http.Server{

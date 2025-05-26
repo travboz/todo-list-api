@@ -8,5 +8,5 @@ import (
 
 type application struct {
 	Logger  *slog.Logger
-	Storage store.Store
+	Storage *store.Storage
 }

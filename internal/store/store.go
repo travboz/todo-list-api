@@ -4,17 +4,21 @@ import (
 	"context"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	"github.com/travboz/backend-projects/todo-list-api/internal/env"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type Store struct {
+type Storage struct {
 	UsersModel
 	TasksModel
 }
 
-func NewStore(t TasksModel, u UsersModel) *Store {
-	return &Store{
-		UsersModel: u,
-		TasksModel: t,
+func NewMongoDBStorage(db *mongo.Client) *Storage {
+	dbName := env.GetString("MONGO_DB_NAME", "todo-list-api")
+
+	return &Storage{
+		UsersModel: MongoDBStoreUsers{db.Database(dbName).Collection("users")},
+		TasksModel: MongoDBStoreTasks{db.Database(dbName).Collection("tasks")},
 	}
 }
 
