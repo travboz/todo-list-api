@@ -6,7 +6,7 @@ help:
 	@echo 'Usage:'
 	@sed -n 's/^##//p' ${MAKEFILE_LIST} | column -t -s ':' |  sed -e 's/^/ /'
 
-OUTPUT_BINARY=blog-api-crud
+OUTPUT_BINARY=todo-list-api
 OUTPUT_DIR=./bin
 ENTRY_DIR=./cmd/api
 SCRIPTS_DIR=./scripts
@@ -50,7 +50,7 @@ compose/down:
 ## connect-shell: connect to the docker container which is running the mongo database
 connect-shell:
 	@echo "Connecting to postgres container via shell.."
-	@docker exec -it ${BLOG_DB_CONTAINER_NAME} /bin/bash
+	@docker exec -it ${DB_CONTAINER_NAME} /bin/bash
 
 ## db/access-port: shows the access port for the mongo db port
 db/access-port:
