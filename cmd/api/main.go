@@ -8,21 +8,16 @@ import (
 	"os"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/travboz/backend-projects/todo-list-api/internal/db"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
 	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 )
 
-func init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Println(err)
+func main() {
+	if err := env.LoadEnv(); err != nil {
 		log.Fatal("Error loading .env file")
 	}
-}
 
-func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 
 	mongo_uri := env.GetString(

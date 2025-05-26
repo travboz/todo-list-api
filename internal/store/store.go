@@ -34,7 +34,7 @@ type TasksModel interface {
 }
 
 type UsersModel interface {
-	Insert(name, email, password string) error
+	Insert(u *data.User) error
 	// Exists(id string) (bool, error)
 	// Get(id string) (*data.User, error)
 }

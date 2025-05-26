@@ -3,6 +3,8 @@ package env
 import (
 	"os"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 func GetString(key, fallback string) string {
@@ -28,4 +30,9 @@ func GetInt(key string, fallback int) int {
 	}
 
 	return valAsInt
+}
+
+func LoadEnv() error {
+	return godotenv.Load()
+
 }

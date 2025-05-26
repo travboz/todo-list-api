@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -11,7 +12,14 @@ type MongoDBStoreTasks struct {
 	tasks *mongo.Collection
 }
 
-func (t MongoDBStoreTasks) Insert(context.Context, *data.Task) error {
+func (t MongoDBStoreTasks) Insert(ctx context.Context, task *data.Task) error {
+	task.ID = primitive.NewObjectID()
+
+	_, err := t.tasks.InsertOne(ctx, task)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 func (t MongoDBStoreTasks) GetTaskById(context.Context, string) (*data.Task, error) {

@@ -30,3 +30,7 @@ func serverErrorResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Req
 	message := "the server encountered a problem and could not process your request"
 	errorResponse(logger, w, r, http.StatusInternalServerError, message)
 }
+
+func badRequestResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request, err error) {
+	errorResponse(logger, w, r, http.StatusBadRequest, err.Error())
+}
