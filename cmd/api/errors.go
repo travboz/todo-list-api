@@ -34,3 +34,7 @@ func serverErrorResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Req
 func badRequestResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request, err error) {
 	errorResponse(logger, w, r, http.StatusBadRequest, err.Error())
 }
+
+func failedValidationResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request, errors map[string]string) {
+	errorResponse(logger, w, r, http.StatusUnprocessableEntity, errors)
+}

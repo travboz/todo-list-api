@@ -1,10 +1,12 @@
 package main
 
 import (
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
@@ -30,11 +32,22 @@ func (app *application) createNewTaskHandler() http.Handler {
 			CreatedAt:   time.Now(),
 		}
 
+		v := validator.New()
+
+		if data.ValiateTask(v, task); !v.Valid() {
+			failedValidationResponse(app.Logger, w, r, v.Errors)
+			return
+		}
+
 		err = app.Storage.TasksModel.Insert(r.Context(), task)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
 		}
+
+		// where to find the new article:
+		headers := make(http.Header)
+		headers.Set("Location", fmt.Sprintf("/api/v1/tasks/%s", task.ID.Hex()))
 
 		err = writeJSON(w, http.StatusCreated, envelope{"task": task}, nil)
 		if err != nil {
