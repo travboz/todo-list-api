@@ -25,11 +25,12 @@ func NewMongoDBStorage(db *mongo.Client) *Storage {
 type TasksModel interface {
 	Insert(context.Context, *data.Task) error
 	GetTaskById(context.Context, string) (*data.Task, error)
+	FetchAllTasks(ctx context.Context) ([]*data.Task, error)
 	// GetOwnerOfTask(context.Context, string) (string, error)
-	// FetchAllTasks(context.Context, string, []string) ([]*data.Task, error)
-	// UpdateTask(context.Context, string, *data.Task) (*data.Task, error)
-	// DeleteTask(context.Context, string) error
-	// CompleteTask(context.Context, string) error
+	UpdateTask(context.Context, string, *data.Task) (*data.Task, error)
+	DeleteTask(context.Context, string) error
+	CompleteTask(ctx context.Context, id string) (*data.Task, error)
+
 	// Shutdown(context.Context) error
 }
 

@@ -38,3 +38,8 @@ func badRequestResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Requ
 func failedValidationResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request, errors map[string]string) {
 	errorResponse(logger, w, r, http.StatusUnprocessableEntity, errors)
 }
+
+func notFoundResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request) {
+	message := "the requested resource could not be found"
+	errorResponse(logger, w, r, http.StatusNotFound, message)
+}
