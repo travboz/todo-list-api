@@ -16,6 +16,11 @@ func (app *application) routes() http.Handler {
 
 	// task related
 	router.Handler(http.MethodPost, "/api/v1/tasks/create", app.createNewTaskHandler())
+	router.Handler(http.MethodGet, "/api/v1/tasks", app.fetchAllTasksHandler())
+	router.Handler(http.MethodGet, "/api/v1/tasks/:id", app.getTasksByIDHandler())
+	router.Handler(http.MethodPut, "/api/v1/tasks/:id/complete", app.completeTaskHandler())
+	router.Handler(http.MethodPatch, "/api/v1/tasks/:id", app.updateTaskHandler())
+	router.Handler(http.MethodDelete, "/api/v1/tasks/:id", app.deleteTaskHandler())
 
 	return router
 }
