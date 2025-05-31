@@ -12,13 +12,13 @@ import (
 )
 
 type MongoDBStoreTasks struct {
-	tasks *mongo.Collection
+	Tasks *mongo.Collection
 }
 
 func (t MongoDBStoreTasks) Insert(ctx context.Context, task *data.Task) error {
 	task.ID = primitive.NewObjectID()
 
-	_, err := t.tasks.InsertOne(ctx, task)
+	_, err := t.Tasks.InsertOne(ctx, task)
 	if err != nil {
 		return err
 	}
@@ -31,7 +31,7 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 		return nil, err
 	}
 
-	result := t.tasks.FindOne(ctx, bson.M{"_id": task_id})
+	result := t.Tasks.FindOne(ctx, bson.M{"_id": task_id})
 
 	var task data.Task
 	if err = result.Decode(&task); err != nil {
@@ -54,7 +54,7 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context) ([]*data.Task, error) {
 	filter := bson.M{}
 
-	cursor, err := t.tasks.Find(ctx, filter)
+	cursor, err := t.Tasks.Find(ctx, filter)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (t MongoDBStoreTasks) UpdateTask(ctx context.Context, id string, task *data
 		Upsert:         &upsert,
 	}
 
-	result := t.tasks.FindOneAndUpdate(
+	result := t.Tasks.FindOneAndUpdate(
 		ctx, filter, update, &opt,
 	)
 
@@ -121,7 +121,7 @@ func (t MongoDBStoreTasks) DeleteTask(ctx context.Context, id string) error {
 		return err
 	}
 
-	result, err := t.tasks.DeleteOne(ctx, bson.M{"_id": task_id})
+	result, err := t.Tasks.DeleteOne(ctx, bson.M{"_id": task_id})
 	if err != nil {
 		return err
 	}
@@ -153,7 +153,7 @@ func (t MongoDBStoreTasks) CompleteTask(ctx context.Context, id string) (*data.T
 		Upsert:         &upsert,
 	}
 
-	result := t.tasks.FindOneAndUpdate(ctx, filter, update, &opt)
+	result := t.Tasks.FindOneAndUpdate(ctx, filter, update, &opt)
 
 	var completedTask data.Task
 

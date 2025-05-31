@@ -36,6 +36,7 @@ type TasksModel interface {
 
 type UsersModel interface {
 	Insert(u *data.User) error
+	Authenticate(email, password string) (string, error)
 	// Exists(id string) (bool, error)
-	// Get(id string) (*data.User, error)
+	Get(id string) (*data.User, error)
 }

@@ -13,6 +13,8 @@ func (app *application) routes() http.Handler {
 
 	// user related
 	router.Handler(http.MethodPost, "/api/v1/users/register", app.registerNewUserHandler())
+	router.Handler(http.MethodGet, "/api/v1/users/:id", app.getUserByIdHandler())
+	router.Handler(http.MethodPost, "/api/v1/users/login", app.userLoginHandler())
 
 	// task related
 	router.Handler(http.MethodPost, "/api/v1/tasks/create", app.createNewTaskHandler())
