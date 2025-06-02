@@ -94,5 +94,6 @@ func (app *application) userLoginHandler() http.Handler {
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
+
 	})
 }

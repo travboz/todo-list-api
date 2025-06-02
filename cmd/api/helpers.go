@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"net/http"
-	"net/url"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
@@ -143,44 +142,44 @@ func readJSON(w http.ResponseWriter, r *http.Request, dest any) error {
 
 }
 
-// The readString() helper returns a string value from the query string, or the provided
-// default value if no matching key could be found.
-func readString(qs url.Values, key string, defaultValue string) string {
-	// Extract the value for a given key from the query string. If no key exists this
-	// will return the empty string "".
-	s := qs.Get(key)
+// // The readString() helper returns a string value from the query string, or the provided
+// // default value if no matching key could be found.
+// func readString(qs url.Values, key string, defaultValue string) string {
+// 	// Extract the value for a given key from the query string. If no key exists this
+// 	// will return the empty string "".
+// 	s := qs.Get(key)
 
-	// If no key exists (or the value is empty) then return the default value.
-	if s == "" {
-		return defaultValue
-	}
+// 	// If no key exists (or the value is empty) then return the default value.
+// 	if s == "" {
+// 		return defaultValue
+// 	}
 
-	// Otherwise return the string.
-	return s
-}
+// 	// Otherwise return the string.
+// 	return s
+// }
 
-// The readCSV() helper reads a string value from the query string and then splits it
-// into a slice on the comma character. If no matching key could be found, it returns
-// the provided default value.
-func readTags(qs url.Values, key string, defaultValue []string) []string {
+// // The readCSV() helper reads a string value from the query string and then splits it
+// // into a slice on the comma character. If no matching key could be found, it returns
+// // the provided default value.
+// func readTags(qs url.Values, key string, defaultValue []string) []string {
 
-	// Extract value from query string
-	csv := qs.Get(key)
+// 	// Extract value from query string
+// 	csv := qs.Get(key)
 
-	// If no key exists (or value is empty) then return default value
-	if csv == "" {
-		return defaultValue
-	}
+// 	// If no key exists (or value is empty) then return default value
+// 	if csv == "" {
+// 		return defaultValue
+// 	}
 
-	var tags []string
+// 	var tags []string
 
-	for _, tagValue := range qs[key] {
-		tags = append(tags, readCSV(tagValue)...)
-	}
+// 	for _, tagValue := range qs[key] {
+// 		tags = append(tags, readCSV(tagValue)...)
+// 	}
 
-	return tags
-}
+// 	return tags
+// }
 
-func readCSV(tags string) []string {
-	return strings.Split(tags, ",")
-}
+// func readCSV(tags string) []string {
+// 	return strings.Split(tags, ",")
+// }

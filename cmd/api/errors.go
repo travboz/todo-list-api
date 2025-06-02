@@ -43,3 +43,8 @@ func notFoundResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Reques
 	message := "the requested resource could not be found"
 	errorResponse(logger, w, r, http.StatusNotFound, message)
 }
+
+func unauthorisedResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request) {
+	message := "you do not have the correct credentials to access this resource"
+	errorResponse(logger, w, r, http.StatusUnauthorized, message)
+}
