@@ -17,12 +17,12 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodPost, "/api/v1/users/login", app.userLoginHandler())
 
 	// task related
-	router.Handler(http.MethodPost, "/api/v1/tasks/create", app.createNewTaskHandler())
-	router.Handler(http.MethodGet, "/api/v1/tasks", app.fetchAllTasksHandler())
+	router.Handler(http.MethodPost, "/api/v1/tasks/create", app.requireToken(app.createNewTaskHandler()))
+	router.Handler(http.MethodGet, "/api/v1/tasks", app.requireToken(app.fetchAllTasksHandler()))
 	router.Handler(http.MethodGet, "/api/v1/tasks/:id", app.requireToken(app.getTasksByIDHandler()))
-	router.Handler(http.MethodPut, "/api/v1/tasks/:id/complete", app.completeTaskHandler())
-	router.Handler(http.MethodPatch, "/api/v1/tasks/:id", app.updateTaskHandler())
-	router.Handler(http.MethodDelete, "/api/v1/tasks/:id", app.deleteTaskHandler())
+	router.Handler(http.MethodPut, "/api/v1/tasks/:id/complete", app.requireToken(app.completeTaskHandler()))
+	router.Handler(http.MethodPatch, "/api/v1/tasks/:id", app.requireToken(app.updateTaskHandler()))
+	router.Handler(http.MethodDelete, "/api/v1/tasks/:id", app.requireToken(app.deleteTaskHandler()))
 
 	return router
 }
