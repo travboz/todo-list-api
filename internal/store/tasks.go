@@ -166,3 +166,24 @@ func (t MongoDBStoreTasks) CompleteTask(ctx context.Context, id string) (*data.T
 
 	return &completedTask, nil
 }
+
+func (t MongoDBStoreTasks) GetTaskOwnerId(ctx context.Context, id string) (string, error) {
+	task_id, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return "", err
+	}
+
+	result := t.Tasks.FindOne(ctx, bson.M{"_id": task_id})
+
+	var task data.Task
+	if err = result.Decode(&task); err != nil {
+		switch {
+		case errors.Is(err, mongo.ErrNoDocuments):
+			return "", ErrRecordNotFound
+		default:
+			return "", err
+		}
+	}
+
+	return task.Owner, nil
+}

@@ -52,8 +52,6 @@ func (app *application) getUserByIdHandler() http.Handler {
 			return
 		}
 
-		app.Logger.Info("current user id is:", "user_id", current_user_id)
-
 		user, err := app.Storage.UsersModel.Get(id)
 		if err != nil {
 			switch {
@@ -101,7 +99,6 @@ func (app *application) userLoginHandler() http.Handler {
 		var token string
 
 		if id != "" {
-			// insert a token into the tokens table with an expiry of 1 hour
 			token, err = app.Storage.TokensModel.InsertToken(r.Context(), id)
 			if err != nil {
 				serverErrorResponse(app.Logger, w, r, err)

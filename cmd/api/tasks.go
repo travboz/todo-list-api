@@ -9,15 +9,15 @@ import (
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
-	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 func (app *application) createNewTaskHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		owner_id, _ := app.getUserIDFromContext(r.Context())
+
 		var input struct {
-			Owner       primitive.ObjectID `json:"owner,omitempty"` // use a dummy, so just start on users then create tasks and use the first user you insert's id
-			Title       string             `json:"title"`
-			Description string             `json:"description"`
+			Title       string `json:"title"`
+			Description string `json:"description"`
 		}
 
 		err := readJSON(w, r, &input)
@@ -27,7 +27,7 @@ func (app *application) createNewTaskHandler() http.Handler {
 		}
 
 		task := &data.Task{
-			// Owner:       input.Owner,
+			Owner:       owner_id,
 			Title:       input.Title,
 			Description: input.Description,
 			Completed:   false,
@@ -102,9 +102,11 @@ func (app *application) getTasksByIDHandler() http.Handler {
 func (app *application) deleteTaskHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := readIDParam(r)
+		// check that current logged in user is owner of task - as per permission requirements
+		ctx := r.Context()
+		task_id := readIDParam(r)
 
-		err := app.Storage.DeleteTask(r.Context(), id)
+		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, store.ErrRecordNotFound):
@@ -116,7 +118,26 @@ func (app *application) deleteTaskHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"message": "succesful deletion of task with id: " + id}, nil)
+		current_user_id, _ := app.getUserIDFromContext(ctx)
+
+		if owner_id != current_user_id {
+			forbiddenResponse(app.Logger, w, r)
+			return
+		}
+
+		err = app.Storage.DeleteTask(ctx, task_id)
+		if err != nil {
+			switch {
+			case errors.Is(err, store.ErrRecordNotFound):
+				notFoundResponse(app.Logger, w, r)
+			default:
+				serverErrorResponse(app.Logger, w, r, err)
+			}
+
+			return
+		}
+
+		err = writeJSON(w, http.StatusOK, envelope{"message": "succesful deletion of task with id: " + task_id}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -127,7 +148,28 @@ func (app *application) deleteTaskHandler() http.Handler {
 func (app *application) updateTaskHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := readIDParam(r)
+		// check that current logged in user is owner of task - as per permission requirements
+		ctx := r.Context()
+		task_id := readIDParam(r)
+
+		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
+		if err != nil {
+			switch {
+			case errors.Is(err, store.ErrRecordNotFound):
+				notFoundResponse(app.Logger, w, r)
+			default:
+				serverErrorResponse(app.Logger, w, r, err)
+			}
+
+			return
+		}
+
+		current_user_id, _ := app.getUserIDFromContext(ctx)
+
+		if owner_id != current_user_id {
+			forbiddenResponse(app.Logger, w, r)
+			return
+		}
 
 		var input struct {
 			Title       string `json:"title" bson:"title"`
@@ -135,7 +177,7 @@ func (app *application) updateTaskHandler() http.Handler {
 			Completed   bool   `json:"completed" bson:"completed"`
 		}
 
-		err := readJSON(w, r, &input)
+		err = readJSON(w, r, &input)
 		if err != nil {
 			badRequestResponse(app.Logger, w, r, err)
 			return
@@ -155,7 +197,7 @@ func (app *application) updateTaskHandler() http.Handler {
 		// 	return
 		// }
 
-		updated, err := app.Storage.UpdateTask(r.Context(), id, task)
+		updated, err := app.Storage.UpdateTask(r.Context(), task_id, task)
 		if err != nil {
 			switch {
 			case errors.Is(err, store.ErrRecordNotFound):
@@ -177,9 +219,31 @@ func (app *application) updateTaskHandler() http.Handler {
 
 func (app *application) completeTaskHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		id := readIDParam(r)
 
-		completed, err := app.Storage.CompleteTask(r.Context(), id)
+		// check that current logged in user is owner of task - as per permission requirements
+		ctx := r.Context()
+		task_id := readIDParam(r)
+
+		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
+		if err != nil {
+			switch {
+			case errors.Is(err, store.ErrRecordNotFound):
+				notFoundResponse(app.Logger, w, r)
+			default:
+				serverErrorResponse(app.Logger, w, r, err)
+			}
+
+			return
+		}
+
+		current_user_id, _ := app.getUserIDFromContext(ctx)
+
+		if owner_id != current_user_id {
+			forbiddenResponse(app.Logger, w, r)
+			return
+		}
+
+		completed, err := app.Storage.CompleteTask(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, store.ErrRecordNotFound):

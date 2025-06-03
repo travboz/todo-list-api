@@ -21,7 +21,7 @@ func NewMongoDBStorage(db *mongo.Client) *Storage {
 
 	db.Database(dbName).Collection("tokens").Indexes().CreateOne(context.Background(), mongo.IndexModel{
 		Keys:    bson.D{{Key: "created_at", Value: 1}},
-		Options: options.Index().SetExpireAfterSeconds(60), // 1 minute expiry
+		Options: options.Index().SetExpireAfterSeconds(360), // 6 minute expiry
 	})
 
 	return &Storage{
@@ -35,10 +35,10 @@ type TasksModel interface {
 	Insert(context.Context, *data.Task) error
 	GetTaskById(context.Context, string) (*data.Task, error)
 	FetchAllTasks(ctx context.Context) ([]*data.Task, error)
-	// GetOwnerOfTask(context.Context, string) (string, error)
 	UpdateTask(context.Context, string, *data.Task) (*data.Task, error)
 	DeleteTask(context.Context, string) error
 	CompleteTask(ctx context.Context, id string) (*data.Task, error)
+	GetTaskOwnerId(ctx context.Context, id string) (string, error)
 
 	// Shutdown(context.Context) error
 }
@@ -46,7 +46,6 @@ type TasksModel interface {
 type UsersModel interface {
 	Insert(u *data.User) error
 	Authenticate(email, password string) (string, error)
-	// Exists(id string) (bool, error)
 	Get(id string) (*data.User, error)
 }
 
