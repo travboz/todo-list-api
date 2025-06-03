@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
-	tokenGen "github.com/travboz/backend-projects/todo-list-api/internal/token"
+	"github.com/travboz/backend-projects/todo-list-api/internal/token"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -18,16 +18,21 @@ type MongoDBStoreTokens struct {
 }
 
 func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (string, error) {
-	var token data.Token
+	var newToken data.Token
 
-	token.ID = primitive.NewObjectID()
-	token.CreatedAt = time.Now()
-	token.Token = tokenGen.GenerateToken()
-	token.UserID, _ = primitive.ObjectIDFromHex(user_id)
+	rand_token, err := token.GenerateToken(32)
+	if err != nil {
+		return "", err
+	}
 
-	_, err := m.Tokens.InsertOne(ctx, token)
+	newToken.ID = primitive.NewObjectID()
+	newToken.CreatedAt = time.Now()
+	newToken.Token = rand_token
+	newToken.UserID, _ = primitive.ObjectIDFromHex(user_id)
 
-	return token.Token, err
+	_, err = m.Tokens.InsertOne(ctx, newToken)
+
+	return newToken.Token, err
 }
 
 func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bool, error) {
