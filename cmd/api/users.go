@@ -46,6 +46,14 @@ func (app *application) getUserByIdHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := readIDParam(r)
 
+		current_user_id, ok := app.getUserIDFromContext(r.Context())
+		if !ok || current_user_id != id {
+			forbiddenResponse(app.Logger, w, r)
+			return
+		}
+
+		app.Logger.Info("current user id is:", "user_id", current_user_id)
+
 		user, err := app.Storage.UsersModel.Get(id)
 		if err != nil {
 			switch {

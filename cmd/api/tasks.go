@@ -58,8 +58,6 @@ func (app *application) createNewTaskHandler() http.Handler {
 	})
 }
 
-// =======================================
-
 func (app *application) fetchAllTasksHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

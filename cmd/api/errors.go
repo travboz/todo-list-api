@@ -57,3 +57,7 @@ func bearerUnauthorisedResponse(logger *slog.Logger, w http.ResponseWriter, r *h
 	w.Header().Set("WWW-Authenticate", `Bearer realm="restricted", charset="UTF-8"`)
 	unauthorisedResponse(logger, w, r)
 }
+
+func forbiddenResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request) {
+	errorResponse(logger, w, r, http.StatusForbidden, "forbidden action")
+}

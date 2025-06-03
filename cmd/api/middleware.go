@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"crypto/sha256"
 	"crypto/subtle"
 	"net/http"
@@ -67,13 +68,25 @@ func (app *application) requireToken(next http.Handler) http.Handler {
 			return
 		}
 
+		ctx := r.Context()
+
 		token := parts[1]
-		valid, err := app.Storage.TokensModel.ValidateToken(r.Context(), token)
+		valid, err := app.Storage.TokensModel.ValidateToken(ctx, token)
 		if err != nil || !valid {
 			bearerUnauthorisedResponse(app.Logger, w, r)
 			return
 		}
 
-		next.ServeHTTP(w, r)
+		// use token to get user id
+		user_id, err := app.Storage.TokensModel.GetUserIdUsingToken(ctx, token)
+		if err != nil {
+			serverErrorResponse(app.Logger, w, r, err)
+		}
+
+		// Store user ID in context
+		ctx = context.WithValue(ctx, contextKeyUserID, user_id)
+
+		// Pass new context down the chain
+		next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }

@@ -31,7 +31,8 @@ func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (st
 }
 
 func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bool, error) {
-	result := m.Tokens.FindOne(ctx, bson.M{"token": token})
+	filter := bson.M{"token": token}
+	result := m.Tokens.FindOne(ctx, filter)
 
 	var tokenData data.Token
 	if err := result.Decode(&tokenData); err != nil {
@@ -48,4 +49,16 @@ func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bo
 	}
 
 	return false, nil
+}
+
+func (m MongoDBStoreTokens) GetUserIdUsingToken(ctx context.Context, token string) (string, error) {
+	filter := bson.M{"token": token}
+	result := m.Tokens.FindOne(ctx, filter)
+
+	var tokenData data.Token
+	if err := result.Decode(&tokenData); err != nil {
+		return "", ErrRecordNotFound
+	}
+
+	return tokenData.UserID.Hex(), nil
 }
