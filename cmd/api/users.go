@@ -90,7 +90,18 @@ func (app *application) userLoginHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusCreated, envelope{"user successfully logged on": id}, nil)
+		var token string
+
+		if id != "" {
+			// insert a token into the tokens table with an expiry of 1 hour
+			token, err = app.Storage.TokensModel.InsertToken(r.Context(), id)
+			if err != nil {
+				serverErrorResponse(app.Logger, w, r, err)
+				return
+			}
+		}
+
+		err = writeJSON(w, http.StatusCreated, envelope{"login": "successful", "token": token}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}

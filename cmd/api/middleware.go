@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"net/http"
+	"strings"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
 )
@@ -45,11 +46,34 @@ func (app *application) basicAuth(next http.Handler) http.Handler {
 			}
 		}
 
-		// Else, if the Authentication header is not present, is invalid, or the
-		// username or password is wrong, then set a WWW-Authenticate
-		// header to inform the client that we expect them to use basic
-		// authentication and send a 401 Unauthorized response.
 		w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
 		unauthorisedResponse(app.Logger, w, r)
+	})
+}
+
+func (app *application) requireToken(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// read auth header
+		authHeader := r.Header.Get("Authorization")
+		if authHeader == "" {
+			bearerUnauthorisedResponse(app.Logger, w, r)
+			return
+		}
+
+		parts := strings.Split(authHeader, " ")
+
+		if len(parts) != 2 || parts[0] != "Bearer" {
+			malformedAuthResponse(app.Logger, w, r, "authorization header is malformed")
+			return
+		}
+
+		token := parts[1]
+		valid, err := app.Storage.TokensModel.ValidateToken(r.Context(), token)
+		if err != nil || !valid {
+			bearerUnauthorisedResponse(app.Logger, w, r)
+			return
+		}
+
+		next.ServeHTTP(w, r)
 	})
 }

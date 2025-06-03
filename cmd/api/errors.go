@@ -48,3 +48,12 @@ func unauthorisedResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Re
 	message := "you do not have the correct credentials to access this resource"
 	errorResponse(logger, w, r, http.StatusUnauthorized, message)
 }
+
+func malformedAuthResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request, message any) {
+	errorResponse(logger, w, r, http.StatusUnauthorized, message)
+}
+
+func bearerUnauthorisedResponse(logger *slog.Logger, w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("WWW-Authenticate", `Bearer realm="restricted", charset="UTF-8"`)
+	unauthorisedResponse(logger, w, r)
+}

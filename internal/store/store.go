@@ -5,20 +5,29 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Storage struct {
 	UsersModel
 	TasksModel
+	TokensModel
 }
 
 func NewMongoDBStorage(db *mongo.Client) *Storage {
 	dbName := env.GetString("MONGO_DB_NAME", "todo-list-api")
 
+	db.Database(dbName).Collection("tokens").Indexes().CreateOne(context.Background(), mongo.IndexModel{
+		Keys:    bson.D{{Key: "created_at", Value: 1}},
+		Options: options.Index().SetExpireAfterSeconds(60), // 1 minute expiry
+	})
+
 	return &Storage{
-		UsersModel: MongoDBStoreUsers{db.Database(dbName).Collection("users")},
-		TasksModel: MongoDBStoreTasks{db.Database(dbName).Collection("tasks")},
+		UsersModel:  MongoDBStoreUsers{db.Database(dbName).Collection("users")},
+		TasksModel:  MongoDBStoreTasks{db.Database(dbName).Collection("tasks")},
+		TokensModel: MongoDBStoreTokens{db.Database(dbName).Collection("tokens")},
 	}
 }
 
@@ -39,4 +48,9 @@ type UsersModel interface {
 	Authenticate(email, password string) (string, error)
 	// Exists(id string) (bool, error)
 	Get(id string) (*data.User, error)
+}
+
+type TokensModel interface {
+	InsertToken(ctx context.Context, user_id string) (string, error)
+	ValidateToken(ctx context.Context, token string) (bool, error)
 }
