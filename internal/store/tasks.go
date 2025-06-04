@@ -47,14 +47,18 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 
 }
 
-// func (t MongoDBStoreTasks) GetOwnerOfTask(context.Context, string) (string, error) {
-// 	return "", nil
-// }
-
-func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context) ([]*data.Task, error) {
+func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination) ([]*data.Task, error) {
 	filter := bson.M{}
 
-	cursor, err := t.Tasks.Find(ctx, filter)
+	limit := int64(p.Limit())
+	skip := int64(p.Offset())
+
+	findOptions := options.FindOptions{
+		Limit: &limit,
+		Skip:  &skip,
+	}
+
+	cursor, err := t.Tasks.Find(ctx, filter, &findOptions)
 	if err != nil {
 		return nil, err
 	}

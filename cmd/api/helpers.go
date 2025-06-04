@@ -6,9 +6,12 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"strconv"
 	"strings"
 
 	"github.com/julienschmidt/httprouter"
+	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
 )
 
 // Retrieve the "id" URL parameter from the current request context.
@@ -142,44 +145,23 @@ func readJSON(w http.ResponseWriter, r *http.Request, dest any) error {
 
 }
 
-// // The readString() helper returns a string value from the query string, or the provided
-// // default value if no matching key could be found.
-// func readString(qs url.Values, key string, defaultValue string) string {
-// 	// Extract the value for a given key from the query string. If no key exists this
-// 	// will return the empty string "".
-// 	s := qs.Get(key)
+func (app *application) readInt(qs url.Values, key string, defaultValue int, v *validator.Validator) int {
+	// Extract the value from the query string.
+	s := qs.Get(key)
 
-// 	// If no key exists (or the value is empty) then return the default value.
-// 	if s == "" {
-// 		return defaultValue
-// 	}
+	// If no key exists (or the value is empty) then return the default value.
+	if s == "" {
+		return defaultValue
+	}
 
-// 	// Otherwise return the string.
-// 	return s
-// }
+	// Try to convert the value to an int. If this fails, add an error message to the
+	// validator instance and return the default value.
+	i, err := strconv.Atoi(s)
+	if err != nil {
+		v.AddError(key, "must be an integer value")
+		return defaultValue
+	}
 
-// // The readCSV() helper reads a string value from the query string and then splits it
-// // into a slice on the comma character. If no matching key could be found, it returns
-// // the provided default value.
-// func readTags(qs url.Values, key string, defaultValue []string) []string {
-
-// 	// Extract value from query string
-// 	csv := qs.Get(key)
-
-// 	// If no key exists (or value is empty) then return default value
-// 	if csv == "" {
-// 		return defaultValue
-// 	}
-
-// 	var tags []string
-
-// 	for _, tagValue := range qs[key] {
-// 		tags = append(tags, readCSV(tagValue)...)
-// 	}
-
-// 	return tags
-// }
-
-// func readCSV(tags string) []string {
-// 	return strings.Split(tags, ",")
-// }
+	// Otherwise, return the converted integer value.
+	return i
+}

@@ -65,7 +65,23 @@ func (app *application) createNewTaskHandler() http.Handler {
 func (app *application) fetchAllTasksHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		tasks, err := app.Storage.FetchAllTasks(r.Context())
+		var input struct {
+			data.Pagination
+		}
+
+		qs := r.URL.Query()
+
+		v := validator.New()
+
+		input.Pagination.Page = app.readInt(qs, "page", 1, v)
+		input.Pagination.PageSize = app.readInt(qs, "page_size", 20, v)
+
+		if data.ValidatePagination(v, input.Pagination); !v.Valid() {
+			failedValidationResponse(app.Logger, w, r, v.Errors)
+			return
+		}
+
+		tasks, err := app.Storage.FetchAllTasks(r.Context(), input.Pagination)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
