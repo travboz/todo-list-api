@@ -6,6 +6,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	"github.com/travboz/backend-projects/todo-list-api/internal/store"
+	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
 )
 
 func (app *application) registerNewUserHandler() http.Handler {
@@ -27,6 +28,13 @@ func (app *application) registerNewUserHandler() http.Handler {
 			Name:     input.Name,
 			Email:    input.Email,
 			Password: input.Password,
+		}
+
+		v := validator.New()
+
+		if data.ValidateUserRegistration(v, user); !v.Valid() {
+			failedValidationResponse(app.Logger, w, r, v.Errors)
+			return
 		}
 
 		err = app.Storage.UsersModel.Insert(user)
@@ -88,6 +96,13 @@ func (app *application) userLoginHandler() http.Handler {
 		user := &data.User{
 			Email:    input.Email,
 			Password: input.Password,
+		}
+
+		v := validator.New()
+
+		if data.ValidateUser(v, user); !v.Valid() {
+			failedValidationResponse(app.Logger, w, r, v.Errors)
+			return
 		}
 
 		id, err := app.Storage.UsersModel.Authenticate(user.Email, user.Password)

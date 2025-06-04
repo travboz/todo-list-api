@@ -13,7 +13,11 @@ import (
 
 func (app *application) createNewTaskHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		owner_id, _ := app.getUserIDFromContext(r.Context())
+		owner_id, ok := app.getUserIDFromContext(r.Context())
+		if !ok {
+			unauthorisedResponse(app.Logger, w, r)
+			return
+		}
 
 		var input struct {
 			Title       string `json:"title"`
@@ -36,7 +40,7 @@ func (app *application) createNewTaskHandler() http.Handler {
 
 		v := validator.New()
 
-		if data.ValiateTask(v, task); !v.Valid() {
+		if data.ValidateTask(v, task); !v.Valid() {
 			failedValidationResponse(app.Logger, w, r, v.Errors)
 			return
 		}
@@ -51,7 +55,7 @@ func (app *application) createNewTaskHandler() http.Handler {
 		headers := make(http.Header)
 		headers.Set("Location", fmt.Sprintf("/api/v1/tasks/%s", task.ID.Hex()))
 
-		err = writeJSON(w, http.StatusCreated, envelope{"task": task}, nil)
+		err = writeJSON(w, http.StatusCreated, envelope{"task": task}, headers)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -118,7 +122,11 @@ func (app *application) deleteTaskHandler() http.Handler {
 			return
 		}
 
-		current_user_id, _ := app.getUserIDFromContext(ctx)
+		current_user_id, ok := app.getUserIDFromContext(ctx)
+		if !ok {
+			unauthorisedResponse(app.Logger, w, r)
+			return
+		}
 
 		if owner_id != current_user_id {
 			forbiddenResponse(app.Logger, w, r)
@@ -137,7 +145,7 @@ func (app *application) deleteTaskHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"message": "succesful deletion of task with id: " + task_id}, nil)
+		err = writeJSON(w, http.StatusOK, envelope{"message": "successful deletion of task with id: " + task_id}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -164,7 +172,11 @@ func (app *application) updateTaskHandler() http.Handler {
 			return
 		}
 
-		current_user_id, _ := app.getUserIDFromContext(ctx)
+		current_user_id, ok := app.getUserIDFromContext(ctx)
+		if !ok {
+			unauthorisedResponse(app.Logger, w, r)
+			return
+		}
 
 		if owner_id != current_user_id {
 			forbiddenResponse(app.Logger, w, r)
@@ -172,9 +184,9 @@ func (app *application) updateTaskHandler() http.Handler {
 		}
 
 		var input struct {
-			Title       string `json:"title" bson:"title"`
-			Description string `json:"description" bson:"description"`
-			Completed   bool   `json:"completed" bson:"completed"`
+			Title       string `json:"title"`
+			Description string `json:"description"`
+			Completed   bool   `json:"completed"`
 		}
 
 		err = readJSON(w, r, &input)
@@ -189,13 +201,12 @@ func (app *application) updateTaskHandler() http.Handler {
 			Completed:   input.Completed,
 		}
 
-		// TODO: Add validation
-		// v := validator.New()
+		v := validator.New()
 
-		// if data.ValidateArticle(v, article); !v.Valid() {
-		// 	failedValidationResponse(logger, w, r, v.Errors)
-		// 	return
-		// }
+		if data.ValidateUpdateTask(v, task); !v.Valid() {
+			failedValidationResponse(app.Logger, w, r, v.Errors)
+			return
+		}
 
 		updated, err := app.Storage.UpdateTask(r.Context(), task_id, task)
 		if err != nil {
@@ -236,7 +247,11 @@ func (app *application) completeTaskHandler() http.Handler {
 			return
 		}
 
-		current_user_id, _ := app.getUserIDFromContext(ctx)
+		current_user_id, ok := app.getUserIDFromContext(ctx)
+		if !ok {
+			unauthorisedResponse(app.Logger, w, r)
+			return
+		}
 
 		if owner_id != current_user_id {
 			forbiddenResponse(app.Logger, w, r)
