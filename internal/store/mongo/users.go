@@ -1,4 +1,4 @@
-package store
+package mongo
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -45,7 +46,7 @@ func (u MongoDBStoreUsers) Authenticate(email, password string) (string, error) 
 		if err = result.Decode(&user); err != nil {
 			switch {
 			case errors.Is(err, mongo.ErrNoDocuments):
-				return "", ErrRecordNotFound
+				return "", appErrors.ErrRecordNotFound
 			default:
 				return "", err
 			}
@@ -56,7 +57,7 @@ func (u MongoDBStoreUsers) Authenticate(email, password string) (string, error) 
 	err := bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(password))
 	if err != nil {
 		if errors.Is(err, bcrypt.ErrMismatchedHashAndPassword) {
-			return "", ErrInvalidCredentials
+			return "", appErrors.ErrInvalidCredentials
 		} else {
 			return "", err
 		}
@@ -85,7 +86,7 @@ func (u MongoDBStoreUsers) Get(id string) (*data.User, error) {
 	if err = result.Decode(&user); err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
-			return nil, ErrRecordNotFound
+			return nil, appErrors.ErrRecordNotFound
 		default:
 			return nil, err
 		}

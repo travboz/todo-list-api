@@ -1,10 +1,11 @@
-package store
+package mongo
 
 import (
 	"context"
 	"errors"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -37,7 +38,7 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 	if err = result.Decode(&task); err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
-			return nil, ErrRecordNotFound
+			return nil, appErrors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -110,7 +111,7 @@ func (t MongoDBStoreTasks) UpdateTask(ctx context.Context, id string, task *data
 	if err = result.Decode(&updatedTask); err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
-			return nil, ErrRecordNotFound
+			return nil, appErrors.ErrRecordNotFound
 		default:
 			return nil, err
 		}
@@ -131,7 +132,7 @@ func (t MongoDBStoreTasks) DeleteTask(ctx context.Context, id string) error {
 	}
 
 	if result.DeletedCount == 0 {
-		return ErrRecordNotFound
+		return appErrors.ErrRecordNotFound
 	}
 
 	return nil
@@ -163,7 +164,7 @@ func (t MongoDBStoreTasks) CompleteTask(ctx context.Context, id string) (*data.T
 
 	if err = result.Decode(&completedTask); err != nil {
 		if errors.Is(err, mongo.ErrNoDocuments) {
-			return nil, ErrRecordNotFound
+			return nil, appErrors.ErrRecordNotFound
 		}
 		return nil, err
 	}
@@ -183,7 +184,7 @@ func (t MongoDBStoreTasks) GetTaskOwnerId(ctx context.Context, id string) (strin
 	if err = result.Decode(&task); err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
-			return "", ErrRecordNotFound
+			return "", appErrors.ErrRecordNotFound
 		default:
 			return "", err
 		}

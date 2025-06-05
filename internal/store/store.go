@@ -5,6 +5,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
+	mongoStore "github.com/travboz/backend-projects/todo-list-api/internal/store/mongo"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
@@ -25,9 +26,9 @@ func NewMongoDBStorage(db *mongo.Client) *Storage {
 	})
 
 	return &Storage{
-		UsersModel:  MongoDBStoreUsers{db.Database(dbName).Collection("users")},
-		TasksModel:  MongoDBStoreTasks{db.Database(dbName).Collection("tasks")},
-		TokensModel: MongoDBStoreTokens{db.Database(dbName).Collection("tokens")},
+		UsersModel:  mongoStore.MongoDBStoreUsers{Users: db.Database(dbName).Collection("users")},
+		TasksModel:  mongoStore.MongoDBStoreTasks{Tasks: db.Database(dbName).Collection("tasks")},
+		TokensModel: mongoStore.MongoDBStoreTokens{Tokens: db.Database(dbName).Collection("tokens")},
 	}
 }
 

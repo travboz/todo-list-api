@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
-	"github.com/travboz/backend-projects/todo-list-api/internal/store"
+	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
 	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
 )
 
@@ -63,7 +63,7 @@ func (app *application) getUserByIdHandler() http.Handler {
 		user, err := app.Storage.UsersModel.Get(id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)

@@ -7,7 +7,7 @@ import (
 	"time"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
-	"github.com/travboz/backend-projects/todo-list-api/internal/store"
+	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
 	"github.com/travboz/backend-projects/todo-list-api/internal/validator"
 )
 
@@ -102,7 +102,7 @@ func (app *application) getTasksByIDHandler() http.Handler {
 		task, err := app.Storage.GetTaskById(r.Context(), id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -129,7 +129,7 @@ func (app *application) deleteTaskHandler() http.Handler {
 		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -152,7 +152,7 @@ func (app *application) deleteTaskHandler() http.Handler {
 		err = app.Storage.DeleteTask(ctx, task_id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -179,7 +179,7 @@ func (app *application) updateTaskHandler() http.Handler {
 		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -227,7 +227,7 @@ func (app *application) updateTaskHandler() http.Handler {
 		updated, err := app.Storage.UpdateTask(r.Context(), task_id, task)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -254,7 +254,7 @@ func (app *application) completeTaskHandler() http.Handler {
 		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)
@@ -277,7 +277,7 @@ func (app *application) completeTaskHandler() http.Handler {
 		completed, err := app.Storage.CompleteTask(r.Context(), task_id)
 		if err != nil {
 			switch {
-			case errors.Is(err, store.ErrRecordNotFound):
+			case errors.Is(err, appErrors.ErrRecordNotFound):
 				notFoundResponse(app.Logger, w, r)
 			default:
 				serverErrorResponse(app.Logger, w, r, err)

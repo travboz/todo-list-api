@@ -1,4 +1,4 @@
-package store
+package mongo
 
 import (
 	"context"
@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
+	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
 	"github.com/travboz/backend-projects/todo-list-api/internal/token"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -43,7 +44,7 @@ func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bo
 	if err := result.Decode(&tokenData); err != nil {
 		switch {
 		case errors.Is(err, mongo.ErrNoDocuments):
-			return false, ErrRecordNotFound
+			return false, appErrors.ErrRecordNotFound
 		default:
 			return false, err
 		}
@@ -62,7 +63,7 @@ func (m MongoDBStoreTokens) GetUserIdUsingToken(ctx context.Context, token strin
 
 	var tokenData data.Token
 	if err := result.Decode(&tokenData); err != nil {
-		return "", ErrRecordNotFound
+		return "", appErrors.ErrRecordNotFound
 	}
 
 	return tokenData.UserID.Hex(), nil
