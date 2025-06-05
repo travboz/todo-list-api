@@ -5,6 +5,7 @@ import "github.com/travboz/backend-projects/todo-list-api/internal/validator"
 type Pagination struct {
 	Page     int
 	PageSize int
+	Filters  []string
 }
 
 func (p Pagination) Limit() int {

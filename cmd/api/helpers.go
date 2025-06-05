@@ -165,3 +165,19 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 	// Otherwise, return the converted integer value.
 	return i
 }
+
+// The readString() helper returns a string value from the query string, or the provided
+// default value if no matching key could be found.
+func (app *application) readString(qs url.Values, key string, defaultValue string) string {
+	// Extract the value for a given key from the query string. If no key exists this
+	// will return the empty string "".
+	s := qs.Get(key)
+
+	// If no key exists (or the value is empty) then return the default value.
+	if s == "" {
+		return defaultValue
+	}
+
+	// Otherwise return the string.
+	return s
+}

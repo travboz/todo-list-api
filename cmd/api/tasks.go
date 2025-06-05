@@ -67,6 +67,7 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
 			data.Pagination
+			Search string
 		}
 
 		qs := r.URL.Query()
@@ -75,13 +76,14 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 
 		input.Pagination.Page = app.readInt(qs, "page", 1, v)
 		input.Pagination.PageSize = app.readInt(qs, "page_size", 20, v)
+		input.Search = app.readString(qs, "search", "")
 
 		if data.ValidatePagination(v, input.Pagination); !v.Valid() {
 			failedValidationResponse(app.Logger, w, r, v.Errors)
 			return
 		}
 
-		tasks, err := app.Storage.FetchAllTasks(r.Context(), input.Pagination)
+		tasks, err := app.Storage.FetchAllTasks(r.Context(), input.Pagination, input.Search)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return

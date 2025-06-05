@@ -48,8 +48,8 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 
 }
 
-func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination) ([]*data.Task, error) {
-	filter := bson.M{}
+func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination, search string) ([]*data.Task, error) {
+	filter := bson.D{{"$text", bson.D{{"$search", search}}}}
 
 	limit := int64(p.Limit())
 	skip := int64(p.Offset())

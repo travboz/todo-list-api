@@ -4,11 +4,6 @@ import (
 	"context"
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
-	"github.com/travboz/backend-projects/todo-list-api/internal/env"
-	mongoStore "github.com/travboz/backend-projects/todo-list-api/internal/store/mongo"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type Storage struct {
@@ -17,25 +12,10 @@ type Storage struct {
 	TokensModel
 }
 
-func NewMongoDBStorage(db *mongo.Client) *Storage {
-	dbName := env.GetString("MONGO_DB_NAME", "todo-list-api")
-
-	db.Database(dbName).Collection("tokens").Indexes().CreateOne(context.Background(), mongo.IndexModel{
-		Keys:    bson.D{{Key: "created_at", Value: 1}},
-		Options: options.Index().SetExpireAfterSeconds(360), // 6 minute expiry
-	})
-
-	return &Storage{
-		UsersModel:  mongoStore.MongoDBStoreUsers{Users: db.Database(dbName).Collection("users")},
-		TasksModel:  mongoStore.MongoDBStoreTasks{Tasks: db.Database(dbName).Collection("tasks")},
-		TokensModel: mongoStore.MongoDBStoreTokens{Tokens: db.Database(dbName).Collection("tokens")},
-	}
-}
-
 type TasksModel interface {
 	Insert(context.Context, *data.Task) error
 	GetTaskById(context.Context, string) (*data.Task, error)
-	FetchAllTasks(ctx context.Context, p data.Pagination) ([]*data.Task, error)
+	FetchAllTasks(ctx context.Context, p data.Pagination, search string) ([]*data.Task, error)
 	UpdateTask(context.Context, string, *data.Task) (*data.Task, error)
 	DeleteTask(context.Context, string) error
 	CompleteTask(ctx context.Context, id string) (*data.Task, error)

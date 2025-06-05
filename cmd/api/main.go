@@ -10,7 +10,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/db"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
-	"github.com/travboz/backend-projects/todo-list-api/internal/store"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store/mongo"
 )
 
 func main() {
@@ -33,7 +33,11 @@ func main() {
 
 	logger.Info("mongodb successfully connected")
 
-	store := store.NewMongoDBStorage(mongoClient)
+	store, err := mongo.NewMongoDBStorage(mongoClient)
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
 
 	app := &application{
 		Logger:  logger,
