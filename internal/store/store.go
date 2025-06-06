@@ -16,7 +16,7 @@ type TasksModel interface {
 	Insert(context.Context, *data.Task) error
 	GetTaskById(context.Context, string) (*data.Task, error)
 	FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error)
-	UpdateTask(context.Context, string, *data.Task) (*data.Task, error)
+	UpdateTask(ctx context.Context, id string, t *data.Task) (*data.Task, error)
 	DeleteTask(context.Context, string) error
 	CompleteTask(ctx context.Context, id string) (*data.Task, error)
 	GetTaskOwnerId(ctx context.Context, id string) (string, error)
