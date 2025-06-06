@@ -48,7 +48,7 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 
 }
 
-func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination, search string) ([]*data.Task, error) {
+func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error) {
 	filter := bson.D{{"$text", bson.D{{"$search", search}}}}
 
 	limit := int64(p.Limit())
@@ -61,7 +61,7 @@ func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination,
 
 	cursor, err := t.Tasks.Find(ctx, filter, &findOptions)
 	if err != nil {
-		return nil, err
+		return nil, data.Metadata{}, err
 	}
 
 	defer cursor.Close(ctx)
@@ -71,13 +71,15 @@ func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Pagination,
 	for cursor.Next(ctx) {
 		var task *data.Task
 		if err := cursor.Decode(&task); err != nil {
-			return nil, err
+			return nil, data.Metadata{}, err
 		}
 
 		tasks = append(tasks, task)
 	}
 
-	return tasks, nil
+	metadata := data.CalculateMetadata(len(tasks), p.Page, p.Limit())
+
+	return tasks, metadata, nil
 
 }
 func (t MongoDBStoreTasks) UpdateTask(ctx context.Context, id string, task *data.Task) (*data.Task, error) {

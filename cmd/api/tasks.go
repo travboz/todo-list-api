@@ -55,7 +55,7 @@ func (app *application) createNewTaskHandler() http.Handler {
 		headers := make(http.Header)
 		headers.Set("Location", fmt.Sprintf("/api/v1/tasks/%s", task.ID.Hex()))
 
-		err = writeJSON(w, http.StatusCreated, envelope{"task": task}, headers)
+		err = writeJSON(w, http.StatusCreated, envelope{"data": task}, headers)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -66,7 +66,7 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var input struct {
-			data.Pagination
+			data.Filters
 			Search string
 		}
 
@@ -74,22 +74,22 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 
 		v := validator.New()
 
-		input.Pagination.Page = app.readInt(qs, "page", 1, v)
-		input.Pagination.PageSize = app.readInt(qs, "page_size", 20, v)
+		input.Filters.Page = app.readInt(qs, "page", 1, v)
+		input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
 		input.Search = app.readString(qs, "search", "")
 
-		if data.ValidatePagination(v, input.Pagination); !v.Valid() {
+		if data.ValidateFilters(v, input.Filters); !v.Valid() {
 			failedValidationResponse(app.Logger, w, r, v.Errors)
 			return
 		}
 
-		tasks, err := app.Storage.FetchAllTasks(r.Context(), input.Pagination, input.Search)
+		tasks, metadata, err := app.Storage.FetchAllTasks(r.Context(), input.Filters, input.Search)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"tasks": tasks}, nil)
+		err = writeJSON(w, http.StatusOK, envelope{"data": tasks, "metadata": metadata}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -113,7 +113,7 @@ func (app *application) getTasksByIDHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"task": task}, nil)
+		err = writeJSON(w, http.StatusOK, envelope{"data": task}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -238,7 +238,7 @@ func (app *application) updateTaskHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"task": updated}, nil)
+		err = writeJSON(w, http.StatusOK, envelope{"data": updated}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
@@ -288,7 +288,7 @@ func (app *application) completeTaskHandler() http.Handler {
 			return
 		}
 
-		err = writeJSON(w, http.StatusOK, envelope{"task": completed}, nil)
+		err = writeJSON(w, http.StatusOK, envelope{"data": completed}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}
