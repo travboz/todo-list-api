@@ -8,6 +8,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"github.com/travboz/backend-projects/todo-list-api/internal/token"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
@@ -16,6 +17,10 @@ import (
 
 type MongoDBStoreTokens struct {
 	Tokens *mongo.Collection
+}
+
+func (ms *MongoStorage) NewMongoTokensModel() store.TokensModel {
+	return MongoDBStoreTokens{ms.db.Collection("tokens")}
 }
 
 func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (string, error) {

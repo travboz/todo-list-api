@@ -7,6 +7,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -15,6 +16,10 @@ import (
 
 type MongoDBStoreUsers struct {
 	Users *mongo.Collection
+}
+
+func (ms *MongoStorage) NewMongoUsersModel() store.UsersModel {
+	return MongoDBStoreUsers{ms.db.Collection("users")}
 }
 
 func (u MongoDBStoreUsers) Insert(user *data.User) error {

@@ -33,7 +33,7 @@ func main() {
 
 	logger.Info("mongodb successfully connected")
 
-	store, err := mongo.NewMongoDBStorage(mongoClient)
+	store, err := mongo.NewMongoStore(mongoClient, env.GetString("MONGO_DB_NAME", "todo-list-api"))
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)

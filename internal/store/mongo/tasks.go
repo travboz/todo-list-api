@@ -6,6 +6,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
 	appErrors "github.com/travboz/backend-projects/todo-list-api/internal/errors"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -14,6 +15,10 @@ import (
 
 type MongoDBStoreTasks struct {
 	Tasks *mongo.Collection
+}
+
+func (ms *MongoStorage) NewMongoTasksModel() store.TasksModel {
+	return MongoDBStoreTasks{ms.db.Collection("tasks")}
 }
 
 func (t MongoDBStoreTasks) Insert(ctx context.Context, task *data.Task) error {
