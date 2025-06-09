@@ -45,7 +45,7 @@ func (app *application) createNewTaskHandler() http.Handler {
 			return
 		}
 
-		err = app.Storage.TasksModel.Insert(r.Context(), task)
+		err = app.Storage.Tasks.Insert(r.Context(), task)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
@@ -83,7 +83,7 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 			return
 		}
 
-		tasks, metadata, err := app.Storage.FetchAllTasks(r.Context(), input.Filters, input.Search)
+		tasks, metadata, err := app.Storage.Tasks.FetchAllTasks(r.Context(), input.Filters, input.Search)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
@@ -101,7 +101,7 @@ func (app *application) getTasksByIDHandler() http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := readIDParam(r)
 
-		task, err := app.Storage.GetTaskById(r.Context(), id)
+		task, err := app.Storage.Tasks.GetTaskById(r.Context(), id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -130,7 +130,7 @@ func (app *application) deleteTaskHandler() http.Handler {
 		ctx := r.Context()
 		task_id := readIDParam(r)
 
-		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
+		owner_id, err := app.Storage.Tasks.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -153,7 +153,7 @@ func (app *application) deleteTaskHandler() http.Handler {
 			return
 		}
 
-		err = app.Storage.DeleteTask(ctx, task_id)
+		err = app.Storage.Tasks.DeleteTask(ctx, task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -180,7 +180,7 @@ func (app *application) updateTaskHandler() http.Handler {
 		ctx := r.Context()
 		task_id := readIDParam(r)
 
-		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
+		owner_id, err := app.Storage.Tasks.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -228,7 +228,7 @@ func (app *application) updateTaskHandler() http.Handler {
 			return
 		}
 
-		updated, err := app.Storage.UpdateTask(r.Context(), task_id, task)
+		updated, err := app.Storage.Tasks.UpdateTask(r.Context(), task_id, task)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -255,7 +255,7 @@ func (app *application) completeTaskHandler() http.Handler {
 		ctx := r.Context()
 		task_id := readIDParam(r)
 
-		owner_id, err := app.Storage.GetTaskOwnerId(r.Context(), task_id)
+		owner_id, err := app.Storage.Tasks.GetTaskOwnerId(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -278,7 +278,7 @@ func (app *application) completeTaskHandler() http.Handler {
 			return
 		}
 
-		completed, err := app.Storage.CompleteTask(r.Context(), task_id)
+		completed, err := app.Storage.Tasks.CompleteTask(r.Context(), task_id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):

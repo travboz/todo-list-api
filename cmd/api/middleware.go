@@ -72,14 +72,14 @@ func (app *application) requireToken(next http.Handler) http.Handler {
 		ctx := r.Context()
 
 		token := parts[1]
-		valid, err := app.Storage.TokensModel.ValidateToken(ctx, token)
+		valid, err := app.Storage.Tokens.ValidateToken(ctx, token)
 		if err != nil || !valid {
 			bearerUnauthorisedResponse(app.Logger, w, r)
 			return
 		}
 
 		// use token to get user id
-		user_id, err := app.Storage.TokensModel.GetUserIdUsingToken(ctx, token)
+		user_id, err := app.Storage.Tokens.GetUserIdUsingToken(ctx, token)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 		}

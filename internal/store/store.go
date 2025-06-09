@@ -3,15 +3,13 @@ package store
 import (
 	"context"
 
-	"github.com/redis/go-redis/v9"
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
-	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Storage struct {
-	UsersModel
-	TasksModel
-	TokensModel
+	Users  UsersModel
+	Tasks  TasksModel
+	Tokens TokensModel
 }
 
 type TasksModel interface {
@@ -36,9 +34,4 @@ type TokensModel interface {
 	InsertToken(ctx context.Context, user_id string) (string, error)
 	ValidateToken(ctx context.Context, token string) (bool, error)
 	GetUserIdUsingToken(ctx context.Context, token string) (string, error)
-}
-
-type TasksRepo struct {
-	db    *mongo.Client
-	cache *redis.Client
 }

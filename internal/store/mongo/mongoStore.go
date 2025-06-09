@@ -31,9 +31,9 @@ func NewMongoStore(client *mongo.Client, dbName string) (*store.Storage, error) 
 
 	// Create and return storage with all models
 	return &store.Storage{
-		UsersModel:  ms.NewMongoUsersModel(),
-		TasksModel:  ms.NewMongoTasksModel(),
-		TokensModel: ms.NewMongoTokensModel(),
+		Users:  ms.NewMongoUsersModel(),
+		Tasks:  ms.NewMongoTasksModel(),
+		Tokens: ms.NewMongoTokensModel(),
 	}, nil
 }
 

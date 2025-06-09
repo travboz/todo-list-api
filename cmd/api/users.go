@@ -37,7 +37,7 @@ func (app *application) registerNewUserHandler() http.Handler {
 			return
 		}
 
-		err = app.Storage.UsersModel.Insert(user)
+		err = app.Storage.Users.Insert(user)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
@@ -60,7 +60,7 @@ func (app *application) getUserByIdHandler() http.Handler {
 			return
 		}
 
-		user, err := app.Storage.UsersModel.Get(id)
+		user, err := app.Storage.Users.Get(id)
 		if err != nil {
 			switch {
 			case errors.Is(err, appErrors.ErrRecordNotFound):
@@ -105,7 +105,7 @@ func (app *application) userLoginHandler() http.Handler {
 			return
 		}
 
-		id, err := app.Storage.UsersModel.Authenticate(user.Email, user.Password)
+		id, err := app.Storage.Users.Authenticate(user.Email, user.Password)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)
 			return
@@ -114,7 +114,7 @@ func (app *application) userLoginHandler() http.Handler {
 		var token string
 
 		if id != "" {
-			token, err = app.Storage.TokensModel.InsertToken(r.Context(), id)
+			token, err = app.Storage.Tokens.InsertToken(r.Context(), id)
 			if err != nil {
 				serverErrorResponse(app.Logger, w, r, err)
 				return

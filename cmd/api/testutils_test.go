@@ -18,8 +18,8 @@ func newTestApplication(t *testing.T) *application {
 	return &application{
 		Logger: slog.New(slog.NewTextHandler(io.Discard, nil)),
 		Storage: &store.Storage{
-			UsersModel: &mocks.UsersStoreMock{},
-			TasksModel: &mocks.TasksStoreMock{},
+			Users: &mocks.UsersStoreMock{},
+			Tasks: &mocks.TasksStoreMock{},
 		},
 	}
 }
