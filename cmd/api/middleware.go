@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"crypto/subtle"
+	"log"
 	"net/http"
 	"strings"
 
@@ -88,5 +89,17 @@ func (app *application) requireToken(next http.Handler) http.Handler {
 
 		// Pass new context down the chain
 		next.ServeHTTP(w, r.WithContext(ctx))
+	})
+}
+
+func (app *application) recoverPanic(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				log.Printf("panic: %v\n", err)
+			}
+		}()
+		next.ServeHTTP(w, r)
 	})
 }

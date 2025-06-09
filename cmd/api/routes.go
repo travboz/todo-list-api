@@ -24,5 +24,5 @@ func (app *application) routes() http.Handler {
 	router.Handler(http.MethodPatch, "/api/v1/tasks/:id", app.requireToken(app.updateTaskHandler()))
 	router.Handler(http.MethodDelete, "/api/v1/tasks/:id", app.requireToken(app.deleteTaskHandler()))
 
-	return router
+	return app.recoverPanic(router)
 }

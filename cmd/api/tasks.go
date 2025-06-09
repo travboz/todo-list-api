@@ -113,6 +113,8 @@ func (app *application) getTasksByIDHandler() http.Handler {
 			return
 		}
 
+		fmt.Println("getTasksByIDHandler: just before writeJSON")
+
 		err = writeJSON(w, http.StatusOK, envelope{"data": task}, nil)
 		if err != nil {
 			serverErrorResponse(app.Logger, w, r, err)

@@ -44,6 +44,7 @@ func (t *TasksStoreMock) FetchAllTasks(ctx context.Context, p data.Filters, sear
 	return []*data.Task{&mockTask}, data.Metadata{CurrentPage: 1, PageSize: 10, TotalRecords: 1}, nil
 }
 
+// TODO: sort out testing of update
 func (t *TasksStoreMock) UpdateTask(ctx context.Context, id string, task *data.Task) (*data.Task, error) {
 	return &mockTask, nil
 }
