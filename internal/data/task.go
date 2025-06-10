@@ -14,7 +14,7 @@ type Task struct {
 	Description string             `bson:"description" json:"description"`
 	Completed   bool               `bson:"completed" json:"completed"`
 	CreatedAt   time.Time          `bson:"created_at" json:"created_at"`
-	UpdatedAt   time.Time          `bson:"updated_at,omitempty" json:"updated_at,omitempty"`
+	UpdatedAt   *time.Time         `json:"updated_at,omitempty" bson:"updated_at,omitempty"`
 }
 
 func ValidateTask(v *validator.Validator, task *Task) {

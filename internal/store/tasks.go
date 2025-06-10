@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
@@ -163,6 +164,7 @@ func (ts *TasksStore) UpdateTask(ctx context.Context, id string, task *data.Task
 			{Key: "title", Value: task.Title},
 			{Key: "description", Value: task.Description},
 			{Key: "completed", Value: task.Completed},
+			{Key: "updated_at", Value: time.Now()},
 		}},
 	}
 

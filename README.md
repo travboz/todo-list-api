@@ -29,7 +29,7 @@ Features
 ### Prerequisites
 - Docker
 - Docker Compose
-- Go (1.18+ recommended)
+- Go (1.22+ recommended)
 
 ## Installation
 
@@ -64,18 +64,18 @@ For an example, see `.env.example`.
 
 ## API Endpoints
 
-| Method    | Endpoint                             | Description                      | Auth Required |
-|-----------|--------------------------------------|----------------------------------|---------------|
-| `GET`     | `/api/v1/healthcheck`                | Health check                     | No            |
-| `POST`    | `/api/v1/users/register`             | Register a new user              | No            |
-| `POST`    | `/api/v1/users/login`                | User login                       | No            |
-| `GET`     | `/api/v1/users/:id`                  | Get user by ID                   | Yes           |
-| `POST`    | `/api/v1/tasks/create`               | Create a new task                | Yes           |
-| `GET`     | `/api/v1/tasks`                      | Fetch all tasks                  | Yes           |
-| `GET`     | `/api/v1/tasks/:id`                  | Get task by ID                   | Yes           |
-| `PUT`     | `/api/v1/tasks/:id/complete`         | Mark task as complete            | Yes           |
-| `PATCH`   | `/api/v1/tasks/:id`                  | Update task                      | Yes           |
-| `DELETE`  | `/api/v1/tasks/:id`                  | Delete task                      | Yes           |
+| Method   | Endpoint                     | Description           | Auth Required |
+| -------- | ---------------------------- | --------------------- | ------------- |
+| `GET`    | `/api/v1/healthcheck`        | Health check          | No            |
+| `POST`   | `/api/v1/users/register`     | Register a new user   | No            |
+| `POST`   | `/api/v1/users/login`        | User login            | No            |
+| `GET`    | `/api/v1/users/:id`          | Get user by ID        | Yes           |
+| `POST`   | `/api/v1/tasks/create`       | Create a new task     | Yes           |
+| `GET`    | `/api/v1/tasks`              | Fetch all tasks       | Yes           |
+| `GET`    | `/api/v1/tasks/:id`          | Get task by ID        | Yes           |
+| `PUT`    | `/api/v1/tasks/:id/complete` | Mark task as complete | Yes           |
+| `PATCH`  | `/api/v1/tasks/:id`          | Update task           | Yes           |
+| `DELETE` | `/api/v1/tasks/:id`          | Delete task           | Yes           |
 
 
 ## Authentication
@@ -119,37 +119,34 @@ Include your token in the Authorization header as: `Authorization: Bearer YOUR_H
 ### Register user payload
 ```json
 {
-  "username": "string",
-  "email": "string",
-  "password": "string"
+    "name": "trav",
+    "email": "trav@trav.com",
+    "password": "pa55word"
 }
 ```
 
 ### Login payload  
 ```json
 {
-  "email": "string",
-  "password": "string"
+    "email": "trav@trav.com",
+    "password": "pa55word"
 }
 ```
 
 ### Create task payload
 ```json
 {
-  "title": "string",
-  "description": "string",
-  "priority": "string",
-  "dueDate": "string"
+    "title": "empty bins",
+    "description": "I need to take out the garbage, both bins"
 }
 ```
 
 ### Update task payload
 ```json
 {
-  "title": "string",
-  "description": "string", 
-  "priority": "string",
-  "dueDate": "string"
+  "title": "new title",
+  "description": "new description", 
+  "completed": "true"
 }
 ```
 
@@ -165,10 +162,10 @@ curl -X GET "http://localhost:8080/api/v1/healthcheck"
 curl -X POST "http://localhost:8080/api/v1/users/register" \
   -H "Content-Type: application/json" \
   -d '{
-    "username": "johndoe",
-    "email": "john@example.com",
-    "password": "securepassword123"
-  }'
+    "name": "trav",
+    "email": "trav@trav.com",
+    "password": "pa55word"
+}'
 ```
 
 ### User login
@@ -176,65 +173,62 @@ curl -X POST "http://localhost:8080/api/v1/users/register" \
 curl -X POST "http://localhost:8080/api/v1/users/login" \
   -H "Content-Type: application/json" \
   -d '{
-    "email": "john@example.com",
-    "password": "securepassword123"
+    "email": "trav@trav.com",
+    "password": "pa55word"
   }'
 ```
 
 ### Get user by ID
 ```sh
-curl -X GET "http://localhost:8080/api/v1/users/123" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X GET "http://localhost:8080/api/v1/users/nefknvejj423vvefve" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE"
 ```
 
 ### Create a new task
 ```sh
 curl -X POST "http://localhost:8080/api/v1/tasks/create" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE" \
   -d '{
-    "title": "Complete project documentation",
-    "description": "Write comprehensive API documentation",
-    "priority": "high",
-    "dueDate": "2025-06-15"
+    "title": "empty bins",
+    "description": "I need to take out the garbage, both bins"
   }'
 ```
 
 ### Fetch all tasks
 ```sh
 curl -X GET "http://localhost:8080/api/v1/tasks" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE"
 ```
 
 ### Get task by ID
 ```sh
-curl -X GET "http://localhost:8080/api/v1/tasks/456" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X GET "http://localhost:8080/api/v1/tasks/veirvniUGURBVUr45r" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE"
 ```
 
 ### Update task
 ```sh
-curl -X PATCH "http://localhost:8080/api/v1/tasks/456" \
+curl -X PATCH "http://localhost:8080/api/v1/tasks/veirvniUGURBVUr45r" \
   -H "Content-Type: application/json" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE" \
   -d '{
-    "title": "Updated task title",
-    "description": "Updated task description",
-    "priority": "medium",
-    "dueDate": "2025-06-20"
+  "title": "new title",
+  "description": "new description", 
+  "completed": false
   }'
 ```
 
 ### Mark task as complete
 ```sh
-curl -X PUT "http://localhost:8080/api/v1/tasks/456/complete" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X PUT "http://localhost:8080/api/v1/tasks/veirvniUGURBVUr45r/complete" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE"
 ```
 
 ### Delete task
 ```sh
-curl -X DELETE "http://localhost:8080/api/v1/tasks/456" \
-  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+curl -X DELETE "http://localhost:8080/api/v1/tasks/veirvniUGURBVUr45r" \
+  -H "Authorization: Bearer YOUR_HEX_TOKEN_HERE"
 ```
 
 ## Query Parameters (Searching by Title)
@@ -245,11 +239,11 @@ You can search by terms contained in the `title` of a task.
 
 ### Available Parameters
 
-| Parameter   | Type     | Default | Description                           |
-|-------------|----------|---------|---------------------------------------|
-| `page`      | integer  | 1       | Page number for pagination            |
-| `page_size` | integer  | 100     | Number of tasks per page              |
-| `search`    | string   | ""      | Search term to filter tasks           |
+| Parameter   | Type    | Default | Description                 |
+| ----------- | ------- | ------- | --------------------------- |
+| `page`      | integer | 1       | Page number for pagination  |
+| `page_size` | integer | 100     | Number of tasks per page    |
+| `search`    | string  | ""      | Search term to filter tasks |
 
 ### Examples
 
@@ -283,21 +277,21 @@ The response includes both the filtered data and metadata about pagination:
 
 ```json
 {
-  "data": [
-    {
-      "id": 1,
-      "title": "Example task",
-      "description": "Task description",
-      "priority": "high", // TODO:
-      "dueDate": "2025-06-15"
+    "data": [
+        {
+            "ID": "68481b48324efcd3aca71764",
+            "owner": "68481b2e324efcd3aca71735",
+            "title": "Send holiday email",
+            "description": "Send holiday greetings emails.",
+            "completed": false,
+            "created_at": "2025-06-10T11:47:20.734Z"
+        }
+    ],
+    "metadata": {
+        "page": 1,
+        "limit": 1,
+        "total": 9
     }
-  ],
-  "metadata": {
-    "page": 1,
-    "page_size": 100,
-    "total_records": 150,
-    "total_pages": 2
-  }
 }
 ```
 
