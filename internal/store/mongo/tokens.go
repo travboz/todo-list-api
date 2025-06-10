@@ -47,7 +47,7 @@ func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (st
 
 // ValidateToken looks up the token in Mongo to see if it still exists. As each token entry has an expiry time.
 // It then compares that the token matches exactly (just in case).
-func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bool, error) {
+func (m MongoDBStoreTokens) GetAndValidateToken(ctx context.Context, token string) (bool, error) {
 	filter := bson.M{"token": token}
 	result := m.Tokens.FindOne(ctx, filter)
 

@@ -29,6 +29,11 @@ func NewTasksStore(collection *mongo.Collection, cache *redis.Client) TasksModel
 	}
 }
 
+func (ts *TasksStore) invalidateCache(ctx context.Context, id string) {
+	cacheKey := fmt.Sprintf("%s:%s", TasksCacheKeyBase, id)
+	ts.cache.Del(ctx, cacheKey)
+}
+
 func (ts *TasksStore) Insert(ctx context.Context, task *data.Task) error {
 	task.ID = primitive.NewObjectID()
 
@@ -39,48 +44,6 @@ func (ts *TasksStore) Insert(ctx context.Context, task *data.Task) error {
 
 	return nil
 }
-
-// func (ts *TasksStore) GetTaskById(ctx context.Context, id string) (*data.Task, error) {
-// 	cacheKey := fmt.Sprintf("task:%s", id)
-
-// 	// 1. Try cache first
-// 	val, err := ts.cache.Get(ctx, cacheKey).Result()
-// 	if err == nil {
-// 		// Cache hit - unmarshal and return
-// 		var task data.Task
-// 		if err := json.Unmarshal([]byte(val), &task); err == nil {
-// 			return &task, nil
-// 		}
-// 		// If unmarshal fails, fall through to database
-// 	}
-// 	// Note: if err == redis.Nil, that's a cache miss, continue to DB
-// 	// Any other redis error, we still try the database as fallback
-
-// 	// 2. Cache miss or error - try database
-// 	task_id, err := primitive.ObjectIDFromHex(id)
-// 	if err != nil {
-// 		return nil, err // Invalid ID format
-// 	}
-
-// 	result := ts.db.FindOne(ctx, bson.M{"_id": task_id})
-
-// 	var task data.Task
-// 	if err = result.Decode(&task); err != nil {
-// 		switch {
-// 		case errors.Is(err, mongo.ErrNoDocuments):
-// 			return nil, appErrors.ErrRecordNotFound
-// 		default:
-// 			return nil, err
-// 		}
-// 	}
-
-// 	// 3. Found in database - cache it for next time
-// 	if taskData, err := json.Marshal(&task); err == nil {
-// 		ts.cache.Set(ctx, cacheKey, taskData, 15*time.Minute)
-// 	}
-
-// 	return &task, nil
-// }
 
 func (ts *TasksStore) GetTaskById(ctx context.Context, id string) (*data.Task, error) {
 	cacheKey := fmt.Sprintf("%s:%s", TasksCacheKeyBase, id)
@@ -137,7 +100,7 @@ func (ts *TasksStore) getTaskFromDB(ctx context.Context, id string) (*data.Task,
 
 func (ts *TasksStore) cacheTask(ctx context.Context, key string, task *data.Task) {
 	if data, err := json.Marshal(task); err == nil {
-		ts.cache.Set(ctx, key, data, ExpiryTime)
+		ts.cache.Set(ctx, key, data, CacheExpiryTime)
 	}
 }
 
@@ -225,6 +188,8 @@ func (ts *TasksStore) UpdateTask(ctx context.Context, id string, task *data.Task
 		}
 	}
 
+	ts.invalidateCache(ctx, id)
+
 	return &updatedTask, nil
 
 }
@@ -242,6 +207,8 @@ func (ts *TasksStore) DeleteTask(ctx context.Context, id string) error {
 	if result.DeletedCount == 0 {
 		return appErrors.ErrRecordNotFound
 	}
+
+	ts.invalidateCache(ctx, id)
 
 	return nil
 }
@@ -276,6 +243,8 @@ func (ts *TasksStore) CompleteTask(ctx context.Context, id string) (*data.Task, 
 		}
 		return nil, err
 	}
+
+	ts.invalidateCache(ctx, id)
 
 	return &completedTask, nil
 }

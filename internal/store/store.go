@@ -32,6 +32,6 @@ type UsersModel interface {
 
 type TokensModel interface {
 	InsertToken(ctx context.Context, user_id string) (string, error)
-	ValidateToken(ctx context.Context, token string) (bool, error)
+	GetAndValidateToken(ctx context.Context, token string) (bool, error)
 	GetUserIdUsingToken(ctx context.Context, token string) (string, error)
 }

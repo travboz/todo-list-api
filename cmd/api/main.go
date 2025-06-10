@@ -53,7 +53,7 @@ func main() {
 		Storage: &store.Storage{
 			Users:  mongostore.NewMongoUsersModel(),
 			Tasks:  store.NewTasksStore(mongostore.DB.Collection("tasks"), redisClient),
-			Tokens: mongostore.NewMongoTokensModel(),
+			Tokens: store.NewTokensStore(mongostore.DB.Collection("tokens"), redisClient),
 		},
 	}
 

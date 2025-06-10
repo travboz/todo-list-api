@@ -72,7 +72,7 @@ func (app *application) requireToken(next http.Handler) http.Handler {
 		ctx := r.Context()
 
 		token := parts[1]
-		valid, err := app.Storage.Tokens.ValidateToken(ctx, token)
+		valid, err := app.Storage.Tokens.GetAndValidateToken(ctx, token)
 		if err != nil || !valid {
 			bearerUnauthorisedResponse(app.Logger, w, r)
 			return
