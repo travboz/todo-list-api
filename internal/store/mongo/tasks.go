@@ -54,7 +54,7 @@ func (t MongoDBStoreTasks) GetTaskById(ctx context.Context, id string) (*data.Ta
 }
 
 func (t MongoDBStoreTasks) FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error) {
-	filter := bson.D{{"$text", bson.D{{"$search", search}}}}
+	filter := bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: search}}}}
 
 	limit := int64(p.Limit())
 	skip := int64(p.Offset())
@@ -95,10 +95,10 @@ func (t MongoDBStoreTasks) UpdateTask(ctx context.Context, id string, task *data
 
 	filter := bson.M{"_id": task_id}
 	update := bson.D{
-		{"$set", bson.D{
-			{"title", task.Title},
-			{"description", task.Description},
-			{"completed", task.Completed},
+		{Key: "$set", Value: bson.D{
+			{Key: "title", Value: task.Title},
+			{Key: "description", Value: task.Description},
+			{Key: "completed", Value: task.Completed},
 		}},
 	}
 
