@@ -19,7 +19,7 @@ type MongoDBStoreUsers struct {
 }
 
 func (ms *MongoStorage) NewMongoUsersModel() store.UsersModel {
-	return MongoDBStoreUsers{ms.db.Collection("users")}
+	return MongoDBStoreUsers{ms.DB.Collection("users")}
 }
 
 func (u MongoDBStoreUsers) Insert(user *data.User) error {

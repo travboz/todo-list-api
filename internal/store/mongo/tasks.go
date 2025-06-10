@@ -18,7 +18,7 @@ type MongoDBStoreTasks struct {
 }
 
 func (ms *MongoStorage) NewMongoTasksModel() store.TasksModel {
-	return MongoDBStoreTasks{ms.db.Collection("tasks")}
+	return MongoDBStoreTasks{ms.DB.Collection("tasks")}
 }
 
 func (t MongoDBStoreTasks) Insert(ctx context.Context, task *data.Task) error {

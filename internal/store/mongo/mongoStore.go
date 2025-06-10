@@ -5,57 +5,51 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type MongoStorage struct {
-	client *mongo.Client
-	dbName string
-	db     *mongo.Database
+	Client *mongo.Client
+	DbName string
+	DB     *mongo.Database
 }
 
-func NewMongoStore(client *mongo.Client, dbName string) (*store.Storage, error) {
+func NewMongoStore(client *mongo.Client, dbName string) (*MongoStorage, error) {
 	ms := &MongoStorage{
-		client: client,
-		dbName: dbName,
-		db:     client.Database(dbName),
+		Client: client,
+		DbName: dbName,
+		DB:     client.Database(dbName),
 	}
 
 	// Setup all indexes
-	if err := ms.setupIndexes(); err != nil {
+	if err := setupIndexes(ms.DB); err != nil {
 		return nil, fmt.Errorf("failed to setup indexes: %w", err)
 	}
 
-	// Create and return storage with all models
-	return &store.Storage{
-		Users:  ms.NewMongoUsersModel(),
-		Tasks:  ms.NewMongoTasksModel(),
-		Tokens: ms.NewMongoTokensModel(),
-	}, nil
+	return ms, nil
 }
 
-func (ms *MongoStorage) setupIndexes() error {
+func setupIndexes(db *mongo.Database) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
 	// Setup tokens index with TTL
-	if err := ms.setupTokensIndexes(ctx); err != nil {
+	if err := setupTokensIndexes(ctx, db); err != nil {
 		return fmt.Errorf("tokens indexes: %w", err)
 	}
 
 	// Setup tasks search index
-	if err := ms.setupTasksIndexes(ctx); err != nil {
+	if err := setupTasksIndexes(ctx, db); err != nil {
 		return fmt.Errorf("tasks indexes: %w", err)
 	}
 
 	return nil
 }
 
-func (ms *MongoStorage) setupTokensIndexes(ctx context.Context) error {
-	collection := ms.db.Collection("tokens")
+func setupTokensIndexes(ctx context.Context, db *mongo.Database) error {
+	collection := db.Collection("tokens")
 
 	// TTL index for token expiry
 	_, err := collection.Indexes().CreateOne(ctx, mongo.IndexModel{
@@ -66,8 +60,8 @@ func (ms *MongoStorage) setupTokensIndexes(ctx context.Context) error {
 	return err
 }
 
-func (ms *MongoStorage) setupTasksIndexes(ctx context.Context) error {
-	collection := ms.db.Collection("tasks")
+func setupTasksIndexes(ctx context.Context, db *mongo.Database) error {
+	collection := db.Collection("tasks")
 
 	// Text search index
 	_, err := collection.Indexes().CreateOne(ctx, mongo.IndexModel{

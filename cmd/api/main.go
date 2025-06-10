@@ -10,6 +10,7 @@ import (
 
 	"github.com/travboz/backend-projects/todo-list-api/internal/db"
 	"github.com/travboz/backend-projects/todo-list-api/internal/env"
+	"github.com/travboz/backend-projects/todo-list-api/internal/store"
 	"github.com/travboz/backend-projects/todo-list-api/internal/store/mongo"
 )
 
@@ -31,17 +32,29 @@ func main() {
 		os.Exit(1)
 	}
 
-	logger.Info("mongodb successfully connected")
-
-	mongo, err := mongo.NewMongoStore(mongoClient, env.GetString("MONGO_DB_NAME", "todo-list-api"))
+	mongostore, err := mongo.NewMongoStore(mongoClient, env.GetString("MONGO_DB_NAME", "todo-list-api"))
 	if err != nil {
 		logger.Error(err.Error())
 		os.Exit(1)
 	}
 
+	logger.Info("mongodb successfully connected")
+
+	redisClient, err := NewRedisClient(DefaultRedisConfig())
+	if err != nil {
+		logger.Error(err.Error())
+		os.Exit(1)
+	}
+
+	logger.Info("redis successfully connected")
+
 	app := &application{
-		Logger:  logger,
-		Storage: mongo,
+		Logger: logger,
+		Storage: &store.Storage{
+			Users:  mongostore.NewMongoUsersModel(),
+			Tasks:  store.NewTasksStore(mongostore.DB.Collection("tasks"), redisClient),
+			Tokens: mongostore.NewMongoTokensModel(),
+		},
 	}
 
 	srv := &http.Server{

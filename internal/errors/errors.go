@@ -7,4 +7,5 @@ var (
 	ErrEditConflict       = errors.New("edit conflict")
 	ErrDuplicateEmail     = errors.New("duplicate email")
 	ErrInvalidCredentials = errors.New("user store: invalid credentials")
+	ErrInvalidQueryString = errors.New("Invalid query string: missing '&' between parameters")
 )

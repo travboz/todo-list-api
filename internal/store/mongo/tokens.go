@@ -20,7 +20,7 @@ type MongoDBStoreTokens struct {
 }
 
 func (ms *MongoStorage) NewMongoTokensModel() store.TokensModel {
-	return MongoDBStoreTokens{ms.db.Collection("tokens")}
+	return MongoDBStoreTokens{ms.DB.Collection("tokens")}
 }
 
 func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (string, error) {

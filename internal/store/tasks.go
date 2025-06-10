@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"strings"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
@@ -141,7 +142,14 @@ func (ts *TasksStore) cacheTask(ctx context.Context, key string, task *data.Task
 }
 
 func (ts *TasksStore) FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error) {
-	filter := bson.D{{"$text", bson.D{{"$search", search}}}}
+	filter := bson.D{}
+	if search != "" {
+		filter = bson.D{{"$text", bson.D{{"$search", search}}}}
+	}
+
+	if strings.Contains(search, "page_size=") {
+		return nil, data.Metadata{}, appErrors.ErrInvalidQueryString
+	}
 
 	limit := int64(p.Limit())
 	skip := int64(p.Offset())
@@ -149,6 +157,12 @@ func (ts *TasksStore) FetchAllTasks(ctx context.Context, p data.Filters, search 
 	findOptions := options.FindOptions{
 		Limit: &limit,
 		Skip:  &skip,
+	}
+
+	// Count total matching documents
+	totalRecords, err := ts.db.CountDocuments(ctx, filter)
+	if err != nil {
+		return nil, data.Metadata{}, err
 	}
 
 	cursor, err := ts.db.Find(ctx, filter, &findOptions)
@@ -169,7 +183,7 @@ func (ts *TasksStore) FetchAllTasks(ctx context.Context, p data.Filters, search 
 		tasks = append(tasks, task)
 	}
 
-	metadata := data.CalculateMetadata(len(tasks), p.Page, p.Limit())
+	metadata := data.CalculateMetadata(int(totalRecords), p.Page, p.Limit())
 
 	return tasks, metadata, nil
 

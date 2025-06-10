@@ -26,7 +26,7 @@ clean:
 
 seed:
 	@echo "Seeding database..."
-	@${SCRIPTS_DIR}/seed_users.sh
+	@${SCRIPTS_DIR}/seed.sh
 	@echo "Seeding complete."
 
 ## run: run the binary/server

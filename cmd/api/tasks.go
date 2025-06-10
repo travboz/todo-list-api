@@ -75,7 +75,7 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 		v := validator.New()
 
 		input.Filters.Page = app.readInt(qs, "page", 1, v)
-		input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+		input.Filters.PageSize = app.readInt(qs, "page_size", 100, v)
 		input.Search = app.readString(qs, "search", "")
 
 		if data.ValidateFilters(v, input.Filters); !v.Valid() {
@@ -85,7 +85,13 @@ func (app *application) fetchAllTasksHandler() http.Handler {
 
 		tasks, metadata, err := app.Storage.Tasks.FetchAllTasks(r.Context(), input.Filters, input.Search)
 		if err != nil {
-			serverErrorResponse(app.Logger, w, r, err)
+			switch {
+			case errors.Is(err, appErrors.ErrInvalidQueryString):
+				badRequestResponse(app.Logger, w, r, err)
+			default:
+				serverErrorResponse(app.Logger, w, r, err)
+			}
+
 			return
 		}
 
