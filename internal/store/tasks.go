@@ -107,7 +107,7 @@ func (ts *TasksStore) cacheTask(ctx context.Context, key string, task *data.Task
 func (ts *TasksStore) FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error) {
 	filter := bson.D{}
 	if search != "" {
-		filter = bson.D{{"$text", bson.D{{"$search", search}}}}
+		filter = bson.D{{Key: "$text", Value: bson.D{{Key: "$search", Value: search}}}}
 	}
 
 	if strings.Contains(search, "page_size=") {
@@ -159,10 +159,10 @@ func (ts *TasksStore) UpdateTask(ctx context.Context, id string, task *data.Task
 
 	filter := bson.M{"_id": task_id}
 	update := bson.D{
-		{"$set", bson.D{
-			{"title", task.Title},
-			{"description", task.Description},
-			{"completed", task.Completed},
+		{Key: "$set", Value: bson.D{
+			{Key: "title", Value: task.Title},
+			{Key: "description", Value: task.Description},
+			{Key: "completed", Value: task.Completed},
 		}},
 	}
 
