@@ -34,13 +34,19 @@ func (m MongoDBStoreTokens) InsertToken(ctx context.Context, user_id string) (st
 	newToken.ID = primitive.NewObjectID()
 	newToken.CreatedAt = time.Now()
 	newToken.Token = rand_token
-	newToken.UserID, _ = primitive.ObjectIDFromHex(user_id)
+
+	newToken.UserID, err = primitive.ObjectIDFromHex(user_id)
+	if err != nil {
+		return "", err
+	}
 
 	_, err = m.Tokens.InsertOne(ctx, newToken)
 
 	return newToken.Token, err
 }
 
+// ValidateToken looks up the token in Mongo to see if it still exists. As each token entry has an expiry time.
+// It then compares that the token matches exactly (just in case).
 func (m MongoDBStoreTokens) ValidateToken(ctx context.Context, token string) (bool, error) {
 	filter := bson.M{"token": token}
 	result := m.Tokens.FindOne(ctx, filter)
