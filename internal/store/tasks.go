@@ -85,18 +85,18 @@ func (ts *TasksStore) Insert(ctx context.Context, task *data.Task) error {
 func (ts *TasksStore) GetTaskById(ctx context.Context, id string) (*data.Task, error) {
 	cacheKey := fmt.Sprintf("%s:%s", TasksCacheKeyBase, id)
 
-	// 1. Try cache
+	// 1. Try cache first
 	if task, ok := ts.getTaskFromCache(ctx, cacheKey); ok {
 		return task, nil
 	}
 
-	// 2. Try DB
+	// 2. Cache miss or error - try database
 	task, err := ts.getTaskFromDB(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	// 3. Cache result (best effort)
+	// 3. Found in database - cache it for next time
 	ts.cacheTask(ctx, cacheKey, task)
 
 	return task, nil
