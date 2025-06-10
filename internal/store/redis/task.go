@@ -3,6 +3,7 @@ package redis
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
@@ -57,7 +58,7 @@ func (c *TasksCacheRedis) GetTaskById(ctx context.Context, id string) (*data.Tas
 		return nil, err
 	}
 
-	c.Redis.Expire(ctx, cacheKey, ExpiryTime)
+	c.Redis.Expire(ctx, cacheKey, 5*time.Minute)
 
 	return task, nil
 }

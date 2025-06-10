@@ -2,7 +2,9 @@ package store
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 
 	"github.com/redis/go-redis/v9"
 	"github.com/travboz/backend-projects/todo-list-api/internal/data"
@@ -37,26 +39,105 @@ func (ts *TasksStore) Insert(ctx context.Context, task *data.Task) error {
 	return nil
 }
 
+// func (ts *TasksStore) GetTaskById(ctx context.Context, id string) (*data.Task, error) {
+// 	cacheKey := fmt.Sprintf("task:%s", id)
+
+// 	// 1. Try cache first
+// 	val, err := ts.cache.Get(ctx, cacheKey).Result()
+// 	if err == nil {
+// 		// Cache hit - unmarshal and return
+// 		var task data.Task
+// 		if err := json.Unmarshal([]byte(val), &task); err == nil {
+// 			return &task, nil
+// 		}
+// 		// If unmarshal fails, fall through to database
+// 	}
+// 	// Note: if err == redis.Nil, that's a cache miss, continue to DB
+// 	// Any other redis error, we still try the database as fallback
+
+// 	// 2. Cache miss or error - try database
+// 	task_id, err := primitive.ObjectIDFromHex(id)
+// 	if err != nil {
+// 		return nil, err // Invalid ID format
+// 	}
+
+// 	result := ts.db.FindOne(ctx, bson.M{"_id": task_id})
+
+// 	var task data.Task
+// 	if err = result.Decode(&task); err != nil {
+// 		switch {
+// 		case errors.Is(err, mongo.ErrNoDocuments):
+// 			return nil, appErrors.ErrRecordNotFound
+// 		default:
+// 			return nil, err
+// 		}
+// 	}
+
+// 	// 3. Found in database - cache it for next time
+// 	if taskData, err := json.Marshal(&task); err == nil {
+// 		ts.cache.Set(ctx, cacheKey, taskData, 15*time.Minute)
+// 	}
+
+// 	return &task, nil
+// }
+
 func (ts *TasksStore) GetTaskById(ctx context.Context, id string) (*data.Task, error) {
-	task_id, err := primitive.ObjectIDFromHex(id)
+	cacheKey := fmt.Sprintf("%s:%s", TasksCacheKeyBase, id)
+
+	// 1. Try cache
+	if task, ok := ts.getTaskFromCache(ctx, cacheKey); ok {
+		return task, nil
+	}
+
+	// 2. Try DB
+	task, err := ts.getTaskFromDB(ctx, id)
 	if err != nil {
 		return nil, err
 	}
 
-	result := ts.db.FindOne(ctx, bson.M{"_id": task_id})
+	// 3. Cache result (best effort)
+	ts.cacheTask(ctx, cacheKey, task)
+
+	return task, nil
+}
+
+func (ts *TasksStore) getTaskFromCache(ctx context.Context, key string) (*data.Task, bool) {
+	val, err := ts.cache.Get(ctx, key).Result()
+	if err != nil {
+		return nil, false // cache miss or error
+	}
+
+	var task data.Task
+	if err := json.Unmarshal([]byte(val), &task); err != nil {
+		return nil, false // failed to parse cached value
+	}
+
+	return &task, true
+}
+
+func (ts *TasksStore) getTaskFromDB(ctx context.Context, id string) (*data.Task, error) {
+	taskID, err := primitive.ObjectIDFromHex(id)
+	if err != nil {
+		return nil, err
+	}
+
+	result := ts.db.FindOne(ctx, bson.M{"_id": taskID})
 
 	var task data.Task
 	if err = result.Decode(&task); err != nil {
-		switch {
-		case errors.Is(err, mongo.ErrNoDocuments):
+		if errors.Is(err, mongo.ErrNoDocuments) {
 			return nil, appErrors.ErrRecordNotFound
-		default:
-			return nil, err
 		}
+		return nil, err
 	}
 
 	return &task, nil
+}
 
+func (ts *TasksStore) cacheTask(ctx context.Context, key string, task *data.Task) {
+	if data, err := json.Marshal(task); err == nil {
+		ts.cache.Set(ctx, key, data, ExpiryTime)
+	}
 }
 
 func (ts *TasksStore) FetchAllTasks(ctx context.Context, p data.Filters, search string) ([]*data.Task, data.Metadata, error) {
